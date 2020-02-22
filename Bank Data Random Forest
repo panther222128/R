@@ -1,0 +1,115 @@
+install.packages("dplyr")
+install.packages("car")
+install.packages("randomForest")
+install.packages("caret")
+install.packages("e1071")
+
+library(dplyr)
+library(car)
+library(randomForest)
+library(caret)
+library(e1071)
+
+churn <- data.frame(read.table(file = "C:/R Analysis/Churn_Modelling.csv", header = TRUE, sep = ","))
+
+head(churn)
+
+str(churn)
+
+sum(is.na(churn$CreditScore))
+sum(is.na(churn$Geography))
+sum(is.na(churn$Gender))
+sum(is.na(churn$Tenure))
+sum(is.na(churn$Balance))
+sum(is.na(churn$NumOfProducts))
+sum(is.na(churn$HasCrCard))
+sum(is.na(churn$IsActiveMember))
+sum(is.na(churn$EstimatedSalary))
+sum(is.na(churn$Exited))
+
+churn <- churn[!is.na(churn$CreditScore),]
+churn <- churn[!is.na(churn$Tenure),]
+churn <- churn[!is.na(churn$Balance),]
+churn <- churn[!is.na(churn$NumOfProducts),]
+churn <- churn[!is.na(churn$HasCrCard),]
+churn <- churn[!is.na(churn$IsActiveMember),]
+churn <- churn[!is.na(churn$EstimatedSalary),]
+churn <- churn[!is.na(churn$Exited),]
+
+sum(is.na(churn$CreditScore))
+sum(is.na(churn$Geography))
+sum(is.na(churn$Gender))
+sum(is.na(churn$Tenure))
+sum(is.na(churn$Balance))
+sum(is.na(churn$NumOfProducts))
+sum(is.na(churn$HasCrCard))
+sum(is.na(churn$IsActiveMember))
+sum(is.na(churn$EstimatedSalary))
+sum(is.na(churn$Exited))
+
+distinct(churn, Geography)
+distinct(churn, Gender)
+distinct(churn, Surname)
+
+is.factor(churn$Geography)
+
+churn$Geography <- recode(churn$Geography, "'France' = 1")
+churn$Geography <- recode(churn$Geography, "'Spain' = 2")
+churn$Geography <- recode(churn$Geography, "'Germany' = 3")
+
+is.factor(churn$Geography)
+
+distinct(churn, Geography)
+
+churn$Gender <- recode(churn$Geography, "'Male' = 2")
+churn$Gender <- recode(churn$Geography, "'Female' = 1")
+
+is.factor(churn$Gender)
+
+distinct(churn, Gender)
+
+head(churn, n=10)
+tail(churn, n=10)
+
+is.factor(churn$HasCrCard)
+is.factor(churn$IsActiveMember)
+is.factor(churn$Exited)
+
+churn$HasCrCard <- as.factor(churn$HasCrCard)
+churn$IsActiveMember <- as.factor(churn$IsActiveMember)
+churn$Exited <- as.factor(churn$Exited)
+
+is.factor(churn$HasCrCard)
+is.factor(churn$IsActiveMember)
+is.factor(churn$Exited)
+
+churnsample <- sample(1:nrow(churn), size = nrow(churn)*0.7)
+
+trainset <- churn[churnsample,]
+testset <- churn[-churnsample,]
+
+str(trainset)
+str(testset)
+
+forest_churn <- randomForest(Exited ~ CreditScore + Geography + Gender + Age + Tenure + Balance + NumOfProducts + HasCrCard + IsActiveMember, data = trainset, ntree = 100, mtry = floor(sqrt(9)))
+
+forest_churn
+
+forest_churn$predicted
+
+forest_churn$importance
+
+str(trainset)
+
+testset1 <- trainset[c("CreditScore", "Geography", "Gender", "Age", "Tenure", "Balance", "NumOfProducts", "HasCrCard", "IsActiveMember")]
+testset2 <- trainset$Exited
+
+str(testset1)
+str(testset2)
+
+forestpred = predict(forest_churn, testset1, type = "prob")
+
+forestpred
+
+confusionMatrix(table(forestpred, testset2))
+
