@@ -12,7 +12,7 @@ library(caret)
 library(e1071)
 library(writexl)
 
-churn <- data.frame(read.table(file = "C:/R Analysis/Churn_Modelling.csv", header = TRUE, sep = ","))
+churn <- data.frame(read.table(file = "C:/R Analysis/Churn_Modelling.csv", header = TRUE))
 
 head(churn)
 
