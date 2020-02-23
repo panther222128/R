@@ -12,7 +12,7 @@ library(caret)
 library(e1071)
 library(writexl)
 
-churn <- data.frame(read.table(file = "C:/R Analysis/Churn_Modelling.csv", header = TRUE, sep = ","))
+churn <- data.frame(read.table(file = "C:/R Analysis/Churn_Modelling.csv", header = TRUE))
 
 head(churn)
 
@@ -92,7 +92,7 @@ testset <- churn[-churnsample,]
 str(trainset)
 str(testset)
 
-forest_churn <- randomForest(Exited ~ CreditScore + Geography + Gender + Age + Tenure + Balance + NumOfProducts + HasCrCard + IsActiveMember + EstimatedSalary, data = trainset, ntree = 100, mtry = floor(sqrt(10)))
+forest_churn <- randomForest(Exited ~ CreditScore + Age + Tenure + Balance + NumOfProducts + EstimatedSalary, data = trainset, ntree = 100, mtry = floor(sqrt(6)))
 
 forest_churn
 
@@ -102,7 +102,7 @@ forest_churn$importance
 
 str(trainset)
 
-testset1 <- trainset[c("CreditScore", "Geography", "Gender", "Age", "Tenure", "Balance", "NumOfProducts", "HasCrCard", "IsActiveMember", "EstimatedSalary")]
+testset1 <- trainset[c("CreditScore", "Age", "Tenure", "Balance", "NumOfProducts", "EstimatedSalary")]
 testset2 <- trainset$Exited
 
 testset1
