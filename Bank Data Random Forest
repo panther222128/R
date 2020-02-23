@@ -3,12 +3,14 @@ install.packages("car")
 install.packages("randomForest")
 install.packages("caret")
 install.packages("e1071")
+install.packages("writexl")
 
 library(dplyr)
 library(car)
 library(randomForest)
 library(caret)
 library(e1071)
+library(writexl)
 
 churn <- data.frame(read.table(file = "C:/R Analysis/Churn_Modelling.csv", header = TRUE, sep = ","))
 
@@ -49,7 +51,6 @@ sum(is.na(churn$Exited))
 
 distinct(churn, Geography)
 distinct(churn, Gender)
-distinct(churn, Surname)
 
 is.factor(churn$Geography)
 
@@ -104,12 +105,31 @@ str(trainset)
 testset1 <- trainset[c("CreditScore", "Geography", "Gender", "Age", "Tenure", "Balance", "NumOfProducts", "HasCrCard", "IsActiveMember")]
 testset2 <- trainset$Exited
 
+testset1
+testset2
+
 str(testset1)
 str(testset2)
 
 forestpred = predict(forest_churn, testset1, type = "prob")
+forestpred = predict(forest_churn, testset1)
 
 forestpred
 
+head(forestpred)
+
 confusionMatrix(table(forestpred, testset2))
 
+testset1
+str(testset1)
+
+trainset
+
+forestresult <- data.frame(trainset, forestpred)
+forestresult1 <- data.frame(testset1, forestpred)
+
+forestresult
+forestresult1
+
+writexl::write_xlsx(forestresult, path = "C:/R Analysis/forestresult.xlsx")
+writexl::write_xlsx(forestresult1, path = "C:/R Analysis/forestresult1.xlsx")
