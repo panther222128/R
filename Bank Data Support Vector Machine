@@ -90,10 +90,12 @@ trainset <- churn[churnsample,]
 testset <- churn[-churnsample,]
 
 
-tune.svm(factor(Exited) ~ CreditScore + Age + Balance + NumOfProducts + EstimatedSalary, data = churn, gamma = 2^(-1:1), cost=2^(2:4))
+tune.svm(Exited ~ CreditScore + Age + Tenure + Balance + NumOfProducts + EstimatedSalary, data = churn, gamma = 2^(-1:1), cost=2^(2:4))
 
-svm_churn <- svm(factor(Exited) ~ CreditScore + Age + Balance + NumOfProducts + EstimatedSalary, data = testset, gamma = 1, cost = 16)
+svm_churn <- svm(Exited ~ CreditScore + Age + Tenure + Balance + NumOfProducts + EstimatedSalary, data = testset, gamma = 1, cost = 16)
 
 yhat_test <- predict(svm_churn, testset)
+
 table <- table(real=testset$Exited, predict = yhat_test)
+
 table
