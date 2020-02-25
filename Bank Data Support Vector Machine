@@ -87,12 +87,24 @@ is.factor(churn$Exited)
 churnsample <- sample(1:nrow(churn), size = nrow(churn)*0.7)
 
 trainset <- churn[churnsample,]
+
 testset <- churn[-churnsample,]
 
-
-tune.svm(Exited ~ CreditScore + Age + Tenure + Balance + NumOfProducts + EstimatedSalary, data = churn, gamma = 2^(-1:1), cost=2^(2:4))
-
 svm_churn <- svm(Exited ~ CreditScore + Age + Tenure + Balance + NumOfProducts + EstimatedSalary, data = testset, gamma = 1, cost = 16)
+
+yhat_test <- predict(svm_churn, testset)
+
+table <- table(real=testset$Exited, predict = yhat_test)
+
+table
+
+
+
+svm_tune <- tune(svm, Exited ~ CreditScore + Age + Tenure + Balance + NumOfProducts + EstimatedSalary, data = trainset, kernel="radial", ranges = list(gamma = 2^(-1:1), cost = 2^(2:4)))
+
+svm_tune
+
+svm_churn <- svm(Exited ~ CreditScore + Age + Tenure + Balance + NumOfProducts + EstimatedSalary, data = testset, gamma = 0.5, cost = 4)
 
 yhat_test <- predict(svm_churn, testset)
 
