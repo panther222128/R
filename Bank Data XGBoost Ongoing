@@ -1,0 +1,117 @@
+install.packages("dplyr")
+install.packages("car")
+install.packages("randomForest")
+install.packages("caret")
+install.packages("e1071")
+install.packages("writexl")
+install.packages("xgboost"))
+install.packages("data.table")
+
+library(dplyr)
+library(car)
+library(randomForest)
+library(caret)
+library(e1071)
+library(writexl)
+library(xgboost)
+library(data.table)
+
+churn <- data.frame(read.csv(file = "C:/R Analysis/Churn_Modelling.csv", header = TRUE))
+
+head(churn)
+
+str(churn)
+
+sum(is.na(churn$CreditScore))
+sum(is.na(churn$Geography))
+sum(is.na(churn$Gender))
+sum(is.na(churn$Tenure))
+sum(is.na(churn$Balance))
+sum(is.na(churn$NumOfProducts))
+sum(is.na(churn$HasCrCard))
+sum(is.na(churn$IsActiveMember))
+sum(is.na(churn$EstimatedSalary))
+sum(is.na(churn$Exited))
+
+churn <- churn[!is.na(churn$CreditScore),]
+churn <- churn[!is.na(churn$Tenure),]
+churn <- churn[!is.na(churn$Balance),]
+churn <- churn[!is.na(churn$NumOfProducts),]
+churn <- churn[!is.na(churn$HasCrCard),]
+churn <- churn[!is.na(churn$IsActiveMember),]
+churn <- churn[!is.na(churn$EstimatedSalary),]
+churn <- churn[!is.na(churn$Exited),]
+
+sum(is.na(churn$CreditScore))
+sum(is.na(churn$Geography))
+sum(is.na(churn$Gender))
+sum(is.na(churn$Tenure))
+sum(is.na(churn$Balance))
+sum(is.na(churn$NumOfProducts))
+sum(is.na(churn$HasCrCard))
+sum(is.na(churn$IsActiveMember))
+sum(is.na(churn$EstimatedSalary))
+sum(is.na(churn$Exited))
+
+distinct(churn, Geography)
+distinct(churn, Gender)
+
+is.factor(churn$Geography)
+
+churn$Geography <- recode(churn$Geography, "'France' = 1")
+churn$Geography <- recode(churn$Geography, "'Spain' = 2")
+churn$Geography <- recode(churn$Geography, "'Germany' = 3")
+
+is.factor(churn$Geography)
+
+distinct(churn, Geography)
+
+churn$Gender <- recode(churn$Geography, "'Male' = 2")
+churn$Gender <- recode(churn$Geography, "'Female' = 1")
+
+is.factor(churn$Gender)
+
+distinct(churn, Gender)
+
+head(churn, n=10)
+tail(churn, n=10)
+
+is.factor(churn$HasCrCard)
+is.factor(churn$IsActiveMember)
+is.factor(churn$Exited)
+
+churn$HasCrCard <- as.numeric(churn$HasCrCard)
+churn$IsActiveMember <- as.numeric(churn$IsActiveMember)
+churn$Exited <- as.numeric(churn$Exited)
+
+is.factor(churn$HasCrCard)
+is.factor(churn$IsActiveMember)
+is.factor(churn$Exited)
+
+churnsample <- sample(1:nrow(churn), size = nrow(churn)*0.7)
+
+trainset <- as.matrix(churn[churnsample,])
+
+testset <- as.matrix(churn[-churnsample,])
+
+xgb.DMatrix(trainset)
+
+
+
+
+
+
+
+
+# load data
+data(agaricus.train, package='xgboost')
+data(agaricus.test, package='xgboost')
+train <- agaricus.train
+test <- agaricus.test
+# fit model
+bst <- xgboost(data = train$data, label = train$label, max.depth = 2, eta = 1, nrounds = 2,
+               nthread = 2, objective = "binary:logistic")
+# predict
+pred <- predict(bst, test$data)
+
+pred
