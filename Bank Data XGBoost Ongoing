@@ -96,13 +96,13 @@ testset <- as.matrix(churn[-churnsample,])
 
 xgb.DMatrix(trainset)
 
+# Remove Character
 
 
 
 
 
-
-
+# Example
 # load data
 data(agaricus.train, package='xgboost')
 data(agaricus.test, package='xgboost')
@@ -115,3 +115,8 @@ bst <- xgboost(data = train$data, label = train$label, max.depth = 2, eta = 1, n
 pred <- predict(bst, test$data)
 
 pred
+
+
+
+
+
