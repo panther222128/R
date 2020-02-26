@@ -6,6 +6,7 @@ install.packages("e1071")
 install.packages("writexl")
 install.packages("xgboost"))
 install.packages("data.table")
+install.packages("Matrix")
 
 library(dplyr)
 library(car)
@@ -15,6 +16,7 @@ library(e1071)
 library(writexl)
 library(xgboost)
 library(data.table)
+library(Matrix)
 
 churn <- data.frame(read.csv(file = "C:/R Analysis/Churn_Modelling.csv", header = TRUE))
 
@@ -80,23 +82,84 @@ is.factor(churn$HasCrCard)
 is.factor(churn$IsActiveMember)
 is.factor(churn$Exited)
 
+churn$Geography <- as.numeric(churn$Geography)
+churn$Gender <- as.numeric(churn$Gender)
 churn$HasCrCard <- as.numeric(churn$HasCrCard)
 churn$IsActiveMember <- as.numeric(churn$IsActiveMember)
 churn$Exited <- as.numeric(churn$Exited)
 
+is.factor(churn$Geography)
+is.factor(churn$Gender)
 is.factor(churn$HasCrCard)
 is.factor(churn$IsActiveMember)
 is.factor(churn$Exited)
 
-churnsample <- sample(1:nrow(churn), size = nrow(churn)*0.7)
+str(churn)
+
+is.character(churn$RowNumber)
+is.character(churn$CustomerId)
+is.character(churn$Surname)
+is.character(churn$CreditScore)
+is.character(churn$Geography)
+is.character(churn$Gender)
+is.character(churn$Age)
+is.character(churn$Tenure)
+is.character(churn$Balance)
+is.character(churn$NumOfProducts)
+is.character(churn$HasCrCard)
+is.character(churn$IsActiveMember)
+is.character(churn$EstimatedSalary)
+is.character(churn$Exited)
+
+str(churn)
+
+x = churn %>% select(-Exited) %>% data.matrix
+
+y = churn$Exited
+
+xgbmodel = xgb.cv(data = x, label = as.numeric(y), num_class = 2, nfold = 5, nrounds = 200, early_stopping_rounds = 150, objective = 'multi:softprob', eval_metric = 'mlogloss', verbose = F, prediction = T)
+
+attributes(xgbmodel)
+
+xgbmodel$evaluation_log
+
+head(xgbmodel$pred)
+
+pred_df = xgbmodel$pred %>% as.data.frame
+
+pred_df
+
+pred_df %>% select(V1, V2) %>% table
+
+pred_df
+
+
+
+pred_df
+
 
 trainset <- as.matrix(churn[churnsample,])
-
 testset <- as.matrix(churn[-churnsample,])
+
+trainset <- as(trainset, "dgCMatrix")
+testset <- as(testset, "dgCMatrix")
+
+names(trainset)
 
 xgb.DMatrix(trainset)
 
-# Remove Character
+bst <- xgboost(data = trainset, label = trainset$Exited, max.depth = 2, eta = 1, nrounds = 2, nthread = 2, objective = "binary:logistic")
+
+pred <- predict(bst, testset)
+
+pred
+
+
+
+
+
+
+
 
 
 
@@ -108,6 +171,12 @@ data(agaricus.train, package='xgboost')
 data(agaricus.test, package='xgboost')
 train <- agaricus.train
 test <- agaricus.test
+
+train
+test
+
+train$data
+
 # fit model
 bst <- xgboost(data = train$data, label = train$label, max.depth = 2, eta = 1, nrounds = 2,
                nthread = 2, objective = "binary:logistic")
@@ -115,8 +184,3 @@ bst <- xgboost(data = train$data, label = train$label, max.depth = 2, eta = 1, n
 pred <- predict(bst, test$data)
 
 pred
-
-
-
-
-
