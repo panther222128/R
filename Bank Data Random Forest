@@ -4,6 +4,9 @@ install.packages("randomForest")
 install.packages("caret")
 install.packages("e1071")
 install.packages("writexl")
+install.packages("xgboost")
+install.packages("data.table")
+install.packages("Matrix")
 
 library(dplyr)
 library(car)
@@ -11,6 +14,9 @@ library(randomForest)
 library(caret)
 library(e1071)
 library(writexl)
+library(xgboost)
+library(data.table)
+library(Matrix)
 
 churn <- data.frame(read.csv(file = "C:/R Analysis/Churn_Modelling.csv", header = TRUE))
 
@@ -76,60 +82,140 @@ is.factor(churn$HasCrCard)
 is.factor(churn$IsActiveMember)
 is.factor(churn$Exited)
 
-churn$HasCrCard <- as.factor(churn$HasCrCard)
-churn$IsActiveMember <- as.factor(churn$IsActiveMember)
-churn$Exited <- as.factor(churn$Exited)
+churn$Geography <- as.numeric(churn$Geography)
+churn$Gender <- as.numeric(churn$Gender)
+churn$HasCrCard <- as.numeric(churn$HasCrCard)
+churn$IsActiveMember <- as.numeric(churn$IsActiveMember)
+churn$Exited <- as.numeric(churn$Exited)
 
+is.factor(churn$Geography)
+is.factor(churn$Gender)
 is.factor(churn$HasCrCard)
 is.factor(churn$IsActiveMember)
 is.factor(churn$Exited)
+
+str(churn)
+
+is.character(churn$RowNumber)
+is.character(churn$CustomerId)
+is.character(churn$Surname)
+is.character(churn$CreditScore)
+is.character(churn$Geography)
+is.character(churn$Gender)
+is.character(churn$Age)
+is.character(churn$Tenure)
+is.character(churn$Balance)
+is.character(churn$NumOfProducts)
+is.character(churn$HasCrCard)
+is.character(churn$IsActiveMember)
+is.character(churn$EstimatedSalary)
+is.character(churn$Exited)
+
+str(churn)
+
+x = churn %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, EstimatedSalary) %>% data.matrix
+
+y = churn$Exited
+
+xgbmodel = xgb.cv(data = x, label = as.numeric(y), num_class = 2, nfold = 5, nrounds = 50, objective = 'multi:softprob', max_depth = 6, eta = 0.3, verbose = T, prediction = T)
+
+xgb.importance(model = xgbmodel)
+
+attributes(xgbmodel)
+
+xgbmodel$evaluation_log
+
+head(xgbmodel$pred)
+
+pred_df = xgbmodel$pred %>% as.data.frame
+
+pred_df
+
+tt <- pred_df %>% select(V1, V2) %>% mutate(pred = ifelse(V1 > V2, "0", "1"), actual = y)
+
+tt %>% select(pred, actual) %>% table
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+str(churn)
+
+x = churn %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, EstimatedSalary) %>% data.matrix
+
+y = churn$Exited
+
+xgbmodel = xgb.cv(data = x, label = as.numeric(y), nrounds = 500, nfold = 5, nthread = 2, metrics = list("rmse", "auc"), max_depth = 3, eta = 1, objective = "binary:logistic", verbose = T, prediction = T)
+
+attributes(xgbmodel)
+
+xgbmodel$evaluation_log
+
+head(xgbmodel$pred)
+
+pred_df = xgbmodel$pred %>% as.data.frame
+
+pred_df
+
+tt <- pred_df %>% select(V1, V2) %>% mutate(pred = ifelse(V1 > V2, "0", "1"), actual = y)
+
+tt %>% select(pred, actual) %>% table
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+str(churn)
 
 churnsample <- sample(1:nrow(churn), size = nrow(churn)*0.7)
 
 trainset <- churn[churnsample,]
 testset <- churn[-churnsample,]
 
-str(trainset)
-str(testset)
+x = trainset %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, EstimatedSalary) %>% data.matrix
 
-forest_churn <- randomForest(Exited ~ CreditScore + Age + Tenure + Balance + NumOfProducts + EstimatedSalary, data = trainset, ntree = 100, mtry = floor(sqrt(6)))
+y = trainset$Exited %>% data.matrix
 
-forest_churn
+xgbmodel = xgboost(data = x, label = as.numeric(y), nrounds = 50, nthread = 2, metrics = list("rmse", "auc"), max_depth = 3, eta = 0.3, objective = "binary:logistic", verbose = T, prediction = T)
 
-forest_churn$predicted
+xgb.importance(model = xgbmodel)
 
-forest_churn$importance
+xgbmodel$evaluation_log
 
-str(trainset)
+pred <- predict(xgbmodel, testset %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, EstimatedSalary) %>% data.matrix)
 
-testset1 <- trainset[c("CreditScore", "Age", "Tenure", "Balance", "NumOfProducts", "EstimatedSalary")]
-testset2 <- trainset$Exited
+c(pred, testset$Exited)
 
-testset1
-testset2
+head(xgbmodel$pred)
 
-str(testset1)
-str(testset2)
+pred_df = xgbmodel$pred %>% as.data.frame
 
-forestpred = predict(forest_churn, testset1, type = "prob")
-forestpred = predict(forest_churn, testset1)
+pred_df
 
-forestpred
+tt <- pred_df %>% select(V1, V2) %>% mutate(pred = ifelse(V1 > V2, "0", "1"), actual = y)
 
-head(forestpred)
-
-confusionMatrix(table(forestpred, testset2))
-
-testset1
-str(testset1)
-
-trainset
-
-forestresult <- data.frame(trainset, forestpred)
-forestresult1 <- data.frame(testset1, forestpred)
-
-forestresult
-forestresult1
-
-writexl::write_xlsx(forestresult, path = "C:/R Analysis/forestresult.xlsx")
-writexl::write_xlsx(forestresult1, path = "C:/R Analysis/forestresult1.xlsx")
+tt %>% select(pred, actual) %>% table
