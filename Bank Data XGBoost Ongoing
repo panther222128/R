@@ -4,7 +4,7 @@ install.packages("randomForest")
 install.packages("caret")
 install.packages("e1071")
 install.packages("writexl")
-install.packages("xgboost"))
+install.packages("xgboost")
 install.packages("data.table")
 install.packages("Matrix")
 
@@ -113,7 +113,7 @@ is.character(churn$Exited)
 
 str(churn)
 
-x = churn %>% select(-Exited) %>% data.matrix
+x = churn %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, EstimatedSalary) %>% data.matrix
 
 y = churn$Exited
 
@@ -129,30 +129,9 @@ pred_df = xgbmodel$pred %>% as.data.frame
 
 pred_df
 
-pred_df %>% select(V1, V2) %>% table
+tt <- pred_df %>% select(V1, V2) %>% mutate(pred = ifelse(V1 > V2, "0", "1"), actual = y)
 
-pred_df
-
-
-
-pred_df
-
-
-trainset <- as.matrix(churn[churnsample,])
-testset <- as.matrix(churn[-churnsample,])
-
-trainset <- as(trainset, "dgCMatrix")
-testset <- as(testset, "dgCMatrix")
-
-names(trainset)
-
-xgb.DMatrix(trainset)
-
-bst <- xgboost(data = trainset, label = trainset$Exited, max.depth = 2, eta = 1, nrounds = 2, nthread = 2, objective = "binary:logistic")
-
-pred <- predict(bst, testset)
-
-pred
+tt %>% select(pred, actual) %>% table
 
 
 
@@ -160,27 +139,3 @@ pred
 
 
 
-
-
-
-
-
-# Example
-# load data
-data(agaricus.train, package='xgboost')
-data(agaricus.test, package='xgboost')
-train <- agaricus.train
-test <- agaricus.test
-
-train
-test
-
-train$data
-
-# fit model
-bst <- xgboost(data = train$data, label = train$label, max.depth = 2, eta = 1, nrounds = 2,
-               nthread = 2, objective = "binary:logistic")
-# predict
-pred <- predict(bst, test$data)
-
-pred
