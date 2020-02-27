@@ -203,6 +203,10 @@ attributes(xgbmodel)
 
 xgbmodel$evaluation_log
 
+pred <- predict(xgbmodel, testset$data)
+
+
+
 head(xgbmodel$pred)
 
 pred_df = xgbmodel$pred %>% as.data.frame
