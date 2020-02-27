@@ -117,7 +117,9 @@ x = churn %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, Estimated
 
 y = churn$Exited
 
-xgbmodel = xgb.cv(data = x, label = as.numeric(y), num_class = 2, nfold = 5, nrounds = 200, early_stopping_rounds = 150, objective = 'multi:softprob', eval_metric = 'mlogloss', verbose = F, prediction = T)
+xgbmodel = xgb.cv(data = x, label = as.numeric(y), num_class = 2, nfold = 5, nrounds = 50, objective = 'multi:softprob', max_depth = 6, eta = 0.3, verbose = T, prediction = T)
+
+xgb.importance(model = xgbmodel)
 
 attributes(xgbmodel)
 
@@ -139,3 +141,74 @@ tt %>% select(pred, actual) %>% table
 
 
 
+
+
+
+
+
+
+
+str(churn)
+
+x = churn %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, EstimatedSalary) %>% data.matrix
+
+y = churn$Exited
+
+xgbmodel = xgb.cv(data = x, label = as.numeric(y), nrounds = 500, nfold = 5, nthread = 2, metrics = list("rmse", "auc"), max_depth = 3, eta = 1, objective = "binary:logistic", verbose = T, prediction = T)
+
+attributes(xgbmodel)
+
+xgbmodel$evaluation_log
+
+head(xgbmodel$pred)
+
+pred_df = xgbmodel$pred %>% as.data.frame
+
+pred_df
+
+tt <- pred_df %>% select(V1, V2) %>% mutate(pred = ifelse(V1 > V2, "0", "1"), actual = y)
+
+tt %>% select(pred, actual) %>% table
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+str(churn)
+
+x = churn %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, EstimatedSalary) %>% data.matrix
+
+y = churn$Exited %>% data.matrix
+
+xgbmodel = xgboost(data = x, label = as.numeric(y), nrounds = 2961, nfold = 5, nthread = 2, metrics = list("rmse", "auc"), max_depth = 3, eta = 0.3, objective = "binary:logistic", verbose = T, prediction = T)
+
+xgb.importance(model = xgbmodel)
+
+attributes(xgbmodel)
+
+xgbmodel$evaluation_log
+
+head(xgbmodel$pred)
+
+pred_df = xgbmodel$pred %>% as.data.frame
+
+pred_df
+
+tt <- pred_df %>% select(V1, V2) %>% mutate(pred = ifelse(V1 > V2, "0", "1"), actual = y)
+
+tt %>% select(pred, actual) %>% table
