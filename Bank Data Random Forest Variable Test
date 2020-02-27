@@ -102,8 +102,8 @@ forest_churn$importance
 
 str(trainset)
 
-testset1 <- trainset[c("CreditScore", "Age", "Balance", "NumOfProducts", "EstimatedSalary")]
-testset2 <- trainset$Exited
+testset1 <- testset[c("CreditScore", "Age", "Balance", "NumOfProducts", "EstimatedSalary")]
+testset2 <- testset$Exited
 
 testset1
 testset2
