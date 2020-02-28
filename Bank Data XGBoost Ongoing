@@ -154,7 +154,7 @@ x = churn %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, Estimated
 
 y = churn$Exited
 
-xgbmodel = xgb.cv(data = x, label = as.numeric(y), nrounds = 500, nfold = 5, nthread = 2, metrics = list("rmse", "auc"), max_depth = 3, eta = 1, objective = "binary:logistic", verbose = T, prediction = T)
+xgbmodel = xgb.cv(data = x, label = as.numeric(y), nrounds = 500, nfold = 5, nthread = 2, metrics = list("rmse", "auc"), max_depth = 3, eta = 1, objective = "binary:logistic", gamma = 5, verbose = T, prediction = T)
 
 attributes(xgbmodel)
 
@@ -200,9 +200,11 @@ x = trainset %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, Estima
 
 y = trainset$Exited %>% data.matrix
 
-xgbmodel = xgboost(data = x, label = as.numeric(y), nrounds = 100, nthread = 2, metrics = list("rmse", "auc"), max_depth = 6, eta = 0.3, objective = "binary:logistic", verbose = T, prediction = T)
+xgbmodel = xgboost(data = x, label = as.numeric(y), nrounds = 100, nthread = 2, metrics = list("rmse", "auc"), max_depth = 6, eta = 0.3, objective = "binary:logistic", gamma = 0, verbose = T, prediction = T)
 
-xgb.importance(model = xgbmodel)
+mat <- xgb.importance(model = xgbmodel)
+
+xgb.plot.importance(importance_matrix = mat[1:6])
 
 xgbmodel$evaluation_log
 
