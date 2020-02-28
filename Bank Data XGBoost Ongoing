@@ -191,21 +191,24 @@ tt %>% select(pred, actual) %>% table
 
 str(churn)
 
-x = churn %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, EstimatedSalary) %>% data.matrix
+churnsample <- sample(1:nrow(churn), size = nrow(churn)*0.7)
 
-y = churn$Exited %>% data.matrix
+trainset <- churn[churnsample,]
+testset <- churn[-churnsample,]
 
-xgbmodel = xgboost(data = x, label = as.numeric(y), nrounds = 2961, nfold = 5, nthread = 2, metrics = list("rmse", "auc"), max_depth = 3, eta = 0.3, objective = "binary:logistic", verbose = T, prediction = T)
+x = trainset %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, EstimatedSalary) %>% data.matrix
+
+y = trainset$Exited %>% data.matrix
+
+xgbmodel = xgboost(data = x, label = as.numeric(y), nrounds = 50, nthread = 2, metrics = list("rmse", "auc"), max_depth = 3, eta = 0.3, objective = "binary:logistic", verbose = T, prediction = T)
 
 xgb.importance(model = xgbmodel)
 
-attributes(xgbmodel)
-
 xgbmodel$evaluation_log
 
-pred <- predict(xgbmodel, testset$data)
+pred <- predict(xgbmodel, testset %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, EstimatedSalary) %>% data.matrix)
 
-
+c(pred, testset$Exited)
 
 head(xgbmodel$pred)
 
