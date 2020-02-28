@@ -200,7 +200,7 @@ x = trainset %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, Estima
 
 y = trainset$Exited %>% data.matrix
 
-xgbmodel = xgboost(data = x, label = as.numeric(y), nrounds = 50, nthread = 2, metrics = list("rmse", "auc"), max_depth = 3, eta = 0.3, objective = "binary:logistic", verbose = T, prediction = T)
+xgbmodel = xgboost(data = x, label = as.numeric(y), nrounds = 500, nthread = 2, metrics = list("rmse", "auc"), max_depth = 6, eta = 0.3, objective = "binary:logistic", verbose = T, prediction = T)
 
 xgb.importance(model = xgbmodel)
 
@@ -208,14 +208,10 @@ xgbmodel$evaluation_log
 
 pred <- predict(xgbmodel, testset %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, EstimatedSalary) %>% data.matrix)
 
-c(pred, testset$Exited)
+aa <- data.frame(pred, testset$Exited)
 
-head(xgbmodel$pred)
+tt <- ifelse(aa$pred < 0.5, "0", "1")
 
-pred_df = xgbmodel$pred %>% as.data.frame
+aa <- data.frame(tt, testset$Exited)
 
-pred_df
-
-tt <- pred_df %>% select(V1, V2) %>% mutate(pred = ifelse(V1 > V2, "0", "1"), actual = y)
-
-tt %>% select(pred, actual) %>% table
+aa %>% select(tt, testset.Exited) %>% table
