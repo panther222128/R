@@ -200,7 +200,7 @@ x = trainset %>% select(CreditScore, Age, Tenure, Balance, NumOfProducts, Estima
 
 y = trainset$Exited %>% data.matrix
 
-xgbmodel = xgboost(data = x, label = as.numeric(y), nrounds = 500, nthread = 2, metrics = list("rmse", "auc"), max_depth = 6, eta = 0.3, objective = "binary:logistic", verbose = T, prediction = T)
+xgbmodel = xgboost(data = x, label = as.numeric(y), nrounds = 100, nthread = 2, metrics = list("rmse", "auc"), max_depth = 6, eta = 0.3, objective = "binary:logistic", verbose = T, prediction = T)
 
 xgb.importance(model = xgbmodel)
 
