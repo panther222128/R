@@ -70,8 +70,8 @@ is.factor(churn$Geography)
 
 distinct(churn, Geography)
 
-churn$Gender <- recode(churn$Geography, "'Male' = 2")
-churn$Gender <- recode(churn$Geography, "'Female' = 1")
+churn$Gender <- recode(churn$Gender, "'Male' = 2")
+churn$Gender <- recode(churn$Gender, "'Female' = 1")
 
 is.factor(churn$Gender)
 
