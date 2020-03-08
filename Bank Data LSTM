@@ -1,0 +1,147 @@
+install.packages("keras")
+install.packages("dplyr")
+install.packages("igraph")
+install.packages("car")
+
+library(keras)
+library(dplyr)
+library(igraph)
+library(car)
+
+churn <- data.frame(read.table(file = "C:/R Analysis/Churn_Modelling.csv", header = TRUE, sep = ","))
+
+head(churn)
+
+str(churn)
+
+sum(is.na(churn$CreditScore))
+sum(is.na(churn$Geography))
+sum(is.na(churn$Gender))
+sum(is.na(churn$Tenure))
+sum(is.na(churn$Balance))
+sum(is.na(churn$NumOfProducts))
+sum(is.na(churn$HasCrCard))
+sum(is.na(churn$IsActiveMember))
+sum(is.na(churn$EstimatedSalary))
+sum(is.na(churn$Exited))
+
+churn <- churn[!is.na(churn$CreditScore),]
+churn <- churn[!is.na(churn$Tenure),]
+churn <- churn[!is.na(churn$Balance),]
+churn <- churn[!is.na(churn$NumOfProducts),]
+churn <- churn[!is.na(churn$HasCrCard),]
+churn <- churn[!is.na(churn$IsActiveMember),]
+churn <- churn[!is.na(churn$EstimatedSalary),]
+churn <- churn[!is.na(churn$Exited),]
+
+sum(is.na(churn$CreditScore))
+sum(is.na(churn$Geography))
+sum(is.na(churn$Gender))
+sum(is.na(churn$Tenure))
+sum(is.na(churn$Balance))
+sum(is.na(churn$NumOfProducts))
+sum(is.na(churn$HasCrCard))
+sum(is.na(churn$IsActiveMember))
+sum(is.na(churn$EstimatedSalary))
+sum(is.na(churn$Exited))
+
+
+
+distinct(churn, Geography)
+distinct(churn, Gender)
+
+is.factor(churn$Geography)
+
+churn$Geography <- recode(churn$Geography, "'France' = 1")
+churn$Geography <- recode(churn$Geography, "'Spain' = 2")
+churn$Geography <- recode(churn$Geography, "'Germany' = 3")
+
+is.factor(churn$Geography)
+
+distinct(churn, Geography)
+
+churn$Gender <- recode(churn$Geography, "'Male' = 2")
+churn$Gender <- recode(churn$Geography, "'Female' = 1")
+
+is.factor(churn$Gender)
+
+distinct(churn, Gender)
+
+head(churn, n=10)
+tail(churn, n=10)
+
+is.factor(churn$HasCrCard)
+is.factor(churn$IsActiveMember)
+is.factor(churn$Exited)
+
+churn$HasCrCard <- as.factor(churn$HasCrCard)
+churn$IsActiveMember <- as.factor(churn$IsActiveMember)
+churn$Exited <- as.factor(churn$Exited)
+
+is.factor(churn$HasCrCard)
+is.factor(churn$IsActiveMember)
+is.factor(churn$Exited)
+
+
+
+
+
+onehot.exited = to_categorical(as.numeric(churn$Exited)-1)
+
+head(churn)
+
+churn_data = as.matrix(churn[, c(4, 8, 9, 10, 11, 12, 13)])
+churn_data = cbind(churn_data, onehot.exited)
+
+head(churn_data)
+
+
+
+
+
+set.seed(17)
+ind <- sample(2, nrow(churn_data), replace = TRUE, prob = c(0.7, 0.3))
+
+churn.training <- churn_data[ind == 1, 1:7]
+churn.test <- churn_data[ind == 2, 1:7]
+churn.trainingtarget <- churn_data[ind == 1, -seq(7)]
+churn.testtarget <- churn_data[ind == 2, -(1:7)]
+
+churn.training
+churn.test
+churn.trainingtarget
+churn.testtarget
+
+churn_data
+
+
+
+
+
+model <- keras_model_sequential()
+
+model %>% layer_dense(units = ncol(churn.trainingtarget), activation = 'softmax', input_shape = ncol(churn.training))
+
+summary(model)
+
+model$inputs
+
+model$outputs
+
+
+
+
+
+sgd <- optimizer_sgd(lr = 0.01)
+
+model %>% compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics = 'accuracy')
+
+history <- model %>% fit(x = churn.training, y = churn.trainingtarget, epochs = 500, batch_size = 5, validation_split = 0.2, verbose = TRUE)
+
+plot(history)
+
+classes <- model %>% predict_classes(churn.test)
+
+table(churn.testtarget%*%0:2, classes)
+
+score <- model %>% evaluate(churn.test, churn.testtarget)
