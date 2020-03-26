@@ -18,6 +18,8 @@ library(xgboost)
 library(data.table)
 library(Matrix)
 
+
+
 churn <- data.frame(read.csv(file = "C:/R Analysis/Churn_Modelling.csv", header = TRUE))
 
 head(churn)
