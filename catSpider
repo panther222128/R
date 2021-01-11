@@ -1,0 +1,63 @@
+install.packages("randomForest")
+install.packages("data.table")
+
+library(randomForest)
+library(data.table)
+
+
+
+
+
+### trainDataSet Creation
+
+trainSampleLeg = sample(x = c(4, 8), size = 10000, replace = TRUE)
+
+trainDataSet <- data.table(trainSampleLeg, cute = as.factor(0), scary = as.factor(0), label = as.factor(0))
+
+trainDataSet[trainDataSet$trainSampleLeg == 4, ]$cute <- as.factor(1)
+trainDataSet[trainDataSet$trainSampleLeg == 8, ]$cute <- as.factor(0)
+
+trainDataSet[trainDataSet$trainSampleLeg == 4, ]$scary <- as.factor(0)
+trainDataSet[trainDataSet$trainSampleLeg == 8, ]$scary <- as.factor(1)
+
+trainDataSet[trainDataSet$trainSampleLeg == 4, ]$label <- as.factor(0)
+trainDataSet[trainDataSet$trainSampleLeg == 8, ]$label <- as.factor(1)
+
+nrow(trainDataSet[trainDataSet$trainSampleLeg == 4, ]) # 5043
+nrow(trainDataSet[trainDataSet$trainSampleLeg == 8, ]) # 4957
+
+colnames(trainDataSet) <- c("legNum", "cute", "scary", "label")
+as.factor(trainDataSet$label)
+
+
+
+
+### testDataSet Creation
+
+testSampleLeg = sample(x = c(4, 8), size = 3000, replace = TRUE)
+
+testDataSet <- data.table(testSampleLeg, cute = as.factor(0), scary = as.factor(0), label = as.factor(0))
+
+testDataSet[testDataSet$testSampleLeg == 4, ]$cute <- as.factor(1)
+testDataSet[testDataSet$testSampleLeg == 8, ]$cute <- as.factor(0)
+
+testDataSet[testDataSet$testSampleLeg == 4, ]$scary <- as.factor(0)
+testDataSet[testDataSet$testSampleLeg == 8, ]$scary <- as.factor(1)
+
+testDataSet[testDataSet$testSampleLeg == 4, ]$label <- as.factor(0)
+testDataSet[testDataSet$testSampleLeg == 8, ]$label <- as.factor(1)
+
+nrow(testDataSet[testDataSet$testSampleLeg == 4, ]) # 1537
+nrow(testDataSet[testDataSet$testSampleLeg == 8, ]) # 1463
+
+colnames(testDataSet) <- c("legNum", "cute", "scary", "label")
+
+### RandomForest
+
+randomForestTrain <- randomForest(label ~ legNum + cute + scary, data = trainDataSet, ntree = 500, mtry = floor(sqrt(3)))
+
+forestPred = predict(randomForestTrain, testDataSet[, 1:3])
+
+testSetLabel <- testDataSet$label
+
+confusionMatrix(table(forestPred, testSetLabel))
